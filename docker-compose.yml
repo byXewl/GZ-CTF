@@ -1,0 +1,38 @@
+version: '3.0'
+services:
+  gzctf:
+    image: gztime/gzctf:latest
+    restart: always
+    environment:
+      - "GZCTF_ADMIN_PASSWORD=Abcde123" # <String3>换成管理员账户密码，账号为Admin,密码必须有大小写，不然导出失败。
+    ports:
+      - "1180:8080" # 对外端口号，前为外部端口。
+    networks:
+      default:
+    volumes:
+      - "./data/files:/app/files"
+      - "./appsettings.json:/app/appsettings.json:ro"
+      - "./logs:/app/log"
+      - "./data/keys:/root/.aspnet/DataProtection-Keys"
+      # - "./k8sconfig.yaml:/app/k8sconfig.yaml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - "POSTGRES_PASSWORD=chen123" # 数据库密码，务必要和appsettings.json中的配置一致
+    networks:
+      default:
+    volumes:
+      - "./data/db:/var/lib/postgresql/data"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.12.0/24
+
